@@ -2,23 +2,27 @@
 
 This directory stores movie metadata used for ingestion into Neo4j (Knowledge Graph) and Pinecone (Vector Database).
 
-## Expected Dataset: TMDB 5000 Movie Dataset
+## Dataset Status: ✅ Acquired & Validated
 
-Source: [Kaggle - TMDB 5000 Movie Dataset](https://www.kaggle.com/datasets/tmdb/tmdb-movie-metadata) or official TMDB export.
-
-Expected files:
-- `tmdb_5000_movies.csv`: Contains `budget`, `genres`, `homepage`, `id`, `keywords`, `original_language`, `original_title`, `overview`, `popularity`, `production_companies`, `production_countries`, `release_date`, `revenue`, `runtime`, `spoken_languages`, `status`, `tagline`, `title`, `vote_average`, `vote_count`.
-- `tmdb_5000_credits.csv`: Contains `movie_id`, `title`, `cast`, `crew`.
+- `tmdb_5000_movies.csv` (5.43 MB): 4,803 movie records with overview, budget, revenue, genres, and ratings.
+- `tmdb_5000_credits.csv` (38.19 MB): 4,803 credits records with complete cast, directors, and crew.
+- `canonical_movies.json` (10.09 MB): Normalized canonical movie documents ready for vector embeddings and graph relations.
 
 ## Attribution
 This product uses the TMDB API and dataset but is not endorsed or certified by TMDB.
 Movie metadata and credits are provided courtesy of The Movie Database (TMDB).
 
-## Ingestion Pipeline
-Once the CSV files are downloaded into this folder:
+## Ingestion Pipeline Commands
 ```bash
+# 1. Validate dataset integrity
 npm run validate:data --workspace=backend
+
+# 2. Normalize and generate canonical movie records
 npm run ingest:movies --workspace=backend
+
+# 3. Ingest nodes & relationships into Neo4j Knowledge Graph
 npm run build:graph --workspace=backend
+
+# 4. Generate Gemini embeddings & upsert into Pinecone
 npm run index:vectors --workspace=backend
 ```

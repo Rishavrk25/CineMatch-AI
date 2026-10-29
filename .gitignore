@@ -13,6 +13,7 @@ node_modules/
 # Large datasets
 data/*.csv
 data/*.zip
+data/*.json
 *.csv
 *.zip
 
