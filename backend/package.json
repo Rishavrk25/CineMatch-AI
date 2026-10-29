@@ -1,0 +1,42 @@
+{
+  "name": "cinematch-backend",
+  "version": "1.0.0",
+  "description": "Backend API for CineMatch AI RAG Movie Recommendation System",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "test": "node --test tests/**/*.test.js",
+    "validate:data": "node scripts/validateDataset.js",
+    "ingest:movies": "node scripts/ingestMovies.js",
+    "build:graph": "node scripts/buildGraph.js",
+    "index:vectors": "node scripts/indexVectors.js",
+    "evaluate": "node scripts/evaluateRecommendations.js"
+  },
+  "dependencies": {
+    "@google/genai": "^0.1.1",
+    "@google/generative-ai": "^0.21.0",
+    "@langchain/community": "^0.3.28",
+    "@langchain/core": "^0.3.38",
+    "@langchain/google-genai": "^0.1.8",
+    "@pinecone-database/pinecone": "^4.0.0",
+    "bcryptjs": "^3.0.2",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "csv-parser": "^3.2.0",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "helmet": "^8.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "langchain": "^0.3.15",
+    "mongoose": "^8.9.5",
+    "neo4j-driver": "^5.28.1",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9",
+    "supertest": "^7.0.0"
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "name": "cinematch-ai",
+  "version": "1.0.0",
+  "description": "CineMatch AI — Intelligent Movie Recommendation System Using RAG, Vector Search, and Knowledge Graphs",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev --workspace=backend\" \"npm run dev --workspace=frontend\"",
+    "dev:backend": "npm run dev --workspace=backend",
+    "dev:frontend": "npm run dev --workspace=frontend",
+    "build:frontend": "npm run build --workspace=frontend",
+    "test:backend": "npm run test --workspace=backend"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  },
+  "keywords": [
+    "movie-recommendation",
+    "rag",
+    "langchain",
+    "pinecone",
+    "neo4j",
+    "gemini",
+    "mern"
+  ],
+  "author": "Rishav",
+  "license": "MIT"
+}
