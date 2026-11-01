@@ -12,12 +12,34 @@ const KNOWN_GENRES = [
   'Mystery', 'Romance', 'Science Fiction', 'Sci-Fi', 'Thriller', 'War', 'Western'
 ];
 
+// Predefined director aliases for instant graph traversal
+const TOP_DIRECTORS = [
+  { name: 'Christopher Nolan', aliases: ['nolan', 'christopher nolan'] },
+  { name: 'David Fincher', aliases: ['fincher', 'david fincher'] },
+  { name: 'Quentin Tarantino', aliases: ['tarantino', 'quentin tarantino'] },
+  { name: 'Steven Spielberg', aliases: ['spielberg', 'steven spielberg'] },
+  { name: 'Martin Scorsese', aliases: ['scorsese', 'martin scorsese'] },
+  { name: 'Stanley Kubrick', aliases: ['kubrick', 'stanley kubrick'] },
+  { name: 'James Cameron', aliases: ['cameron', 'james cameron'] },
+  { name: 'Denis Villeneuve', aliases: ['villeneuve', 'denis villeneuve'] },
+  { name: 'Ridley Scott', aliases: ['ridley scott'] },
+  { name: 'Alfred Hitchcock', aliases: ['hitchcock', 'alfred hitchcock'] },
+  { name: 'Peter Jackson', aliases: ['peter jackson'] },
+  { name: 'George Lucas', aliases: ['george lucas'] },
+  { name: 'Wes Anderson', aliases: ['wes anderson'] },
+  { name: 'Guillermo del Toro', aliases: ['del toro', 'guillermo del toro'] }
+];
+
 /**
  * Extracts explicit constraints and intents from natural language query.
  */
 export function parseQueryConstraints(queryText, explicitFilters = {}) {
-  // Normalize hyphens and lower-case
-  const normalizedQuery = (queryText || '').toLowerCase().replace(/science-fiction/g, 'science fiction').replace(/sci-fi/g, 'science fiction');
+  // Normalize hyphens and common abbreviations
+  const normalizedQuery = (queryText || '')
+    .toLowerCase()
+    .replace(/science-fiction/g, 'science fiction')
+    .replace(/sci-fi/g, 'science fiction')
+    .replace(/\bsci fi\b/g, 'science fiction');
   const query = (queryText || '').toLowerCase();
 
   const extracted = {
@@ -29,6 +51,22 @@ export function parseQueryConstraints(queryText, explicitFilters = {}) {
     actors: [],
     keywords: []
   };
+
+  // Detect director mentions (e.g., "Nolan", "Fincher", "directed by Christopher Nolan")
+  for (const dir of TOP_DIRECTORS) {
+    if (dir.aliases.some(alias => new RegExp(`\\b${alias}\\b`, 'i').test(query))) {
+      extracted.directors.push(dir.name);
+    }
+  }
+
+  // Also match generic "directed by <Name>" pattern
+  const directedByMatch = query.match(/(?:directed by|director)\s+([a-z\s]+?)(?:,|\.|\band\b|$)/i);
+  if (directedByMatch) {
+    const rawName = directedByMatch[1].trim();
+    if (rawName && !extracted.directors.some(d => d.toLowerCase() === rawName.toLowerCase())) {
+      extracted.directors.push(rawName);
+    }
+  }
 
   // 1. Detect negative genre exclusions (e.g. "avoid horror", "no comedy", "without romance", "exclude action")
   const negativePatterns = [
