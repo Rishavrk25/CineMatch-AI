@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Film, Sparkles, Compass, Bookmark, MessageSquare, LogIn, User, Menu, X, Activity } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Film, Sparkles, Compass, Bookmark, LogIn, LogOut, User, Menu, X, Activity } from 'lucide-react';
 import apiClient from '../api/client';
+import { useAuth } from '../hooks/useAuth';
 
 export default function Navbar() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, isAuthenticated, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [healthStatus, setHealthStatus] = useState({ status: 'checking', message: 'Checking...' });
 
@@ -32,6 +35,11 @@ export default function Navbar() {
     };
   }, []);
 
+  const handleLogout = async () => {
+    await logout();
+    navigate('/');
+  };
+
   const navLinks = [
     { name: 'Home', path: '/', icon: Film },
     { name: 'Explore', path: '/explore', icon: Compass },
@@ -40,7 +48,7 @@ export default function Navbar() {
   ];
 
   return (
-    <header className="sticky top-0 z-50 glass-panel border-b border-charcoal-700/60 bg-charcoal-900/80">
+    <header className="sticky top-0 z-50 glass-panel border-b border-charcoal-700/60 bg-charcoal-900/80 backdrop-blur-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
@@ -104,13 +112,32 @@ export default function Navbar() {
               <span className="text-gray-400 capitalize">{healthStatus.status}</span>
             </div>
 
-            <Link
-              to="/login"
-              className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-white bg-gradient-to-r from-cinematic-violet to-cinematic-violetHover hover:opacity-90 shadow-md shadow-cinematic-violet/20 transition-all"
-            >
-              <LogIn className="w-4 h-4" />
-              <span>Sign In</span>
-            </Link>
+            {isAuthenticated ? (
+              <div className="flex items-center gap-3">
+                <Link
+                  to="/profile"
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-charcoal-800 border border-charcoal-700 text-sm font-medium text-white hover:border-cinematic-violet transition-colors"
+                >
+                  <User className="w-4 h-4 text-cinematic-violet" />
+                  <span className="max-w-[120px] truncate">{user?.name || 'Profile'}</span>
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  title="Sign Out"
+                  className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-charcoal-800 transition-colors"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
+              </div>
+            ) : (
+              <Link
+                to="/login"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-white bg-gradient-to-r from-cinematic-violet to-cinematic-violetHover hover:opacity-90 shadow-md shadow-cinematic-violet/20 transition-all"
+              >
+                <LogIn className="w-4 h-4" />
+                <span>Sign In</span>
+              </Link>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -155,14 +182,37 @@ export default function Navbar() {
             );
           })}
           <div className="pt-2 border-t border-charcoal-700/60 flex flex-col gap-2">
-            <Link
-              to="/login"
-              onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-semibold text-white bg-cinematic-violet hover:bg-cinematic-violetHover"
-            >
-              <LogIn className="w-4 h-4" />
-              <span>Sign In</span>
-            </Link>
+            {isAuthenticated ? (
+              <>
+                <Link
+                  to="/profile"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium text-white bg-charcoal-800"
+                >
+                  <User className="w-4 h-4 text-cinematic-violet" />
+                  <span>{user?.name} Profile</span>
+                </Link>
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    handleLogout();
+                  }}
+                  className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-semibold text-red-400 hover:bg-red-950/40"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>Sign Out</span>
+                </button>
+              </>
+            ) : (
+              <Link
+                to="/login"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-semibold text-white bg-cinematic-violet hover:bg-cinematic-violetHover"
+              >
+                <LogIn className="w-4 h-4" />
+                <span>Sign In</span>
+              </Link>
+            )}
           </div>
         </div>
       )}

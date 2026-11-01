@@ -1,9 +1,15 @@
-import { test, describe } from 'node:test';
+import { test, describe, after } from 'node:test';
 import assert from 'node:assert/strict';
 import request from 'supertest';
 import app from '../src/app.js';
+import { closeMongoDB } from '../src/config/mongodb.js';
+import { closeNeo4j } from '../src/config/neo4j.js';
 
 describe('System Health & Foundation Tests', () => {
+  after(async () => {
+    await closeMongoDB();
+    await closeNeo4j();
+  });
   test('GET / returns API welcome and version info', async () => {
     const res = await request(app).get('/');
     assert.equal(res.status, 200);

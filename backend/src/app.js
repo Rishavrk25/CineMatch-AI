@@ -10,6 +10,11 @@ import { logger } from './utils/logger.js';
 
 // Route imports
 import healthRoutes from './routes/health.routes.js';
+import authRoutes from './routes/auth.routes.js';
+import movieRoutes from './routes/movie.routes.js';
+import recommendationRoutes from './routes/recommendation.routes.js';
+import watchlistRoutes from './routes/watchlist.routes.js';
+import interactionRoutes from './routes/interaction.routes.js';
 
 const app = express();
 
@@ -27,7 +32,6 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (like mobile apps, curl, server-to-server)
       if (!origin || allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
@@ -55,8 +59,13 @@ if (env.NODE_ENV === 'development') {
 // Global API rate limiting
 app.use('/api', apiLimiter);
 
-// Mount routes
+// Mount API routes
 app.use('/api', healthRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/movies', movieRoutes);
+app.use('/api/recommendations', recommendationRoutes);
+app.use('/api/watchlist', watchlistRoutes);
+app.use('/api/interactions', interactionRoutes);
 
 // Root route
 app.get('/', (req, res) => {

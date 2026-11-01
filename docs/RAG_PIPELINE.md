@@ -1,61 +1,84 @@
-# CineMatch AI — RAG & Recommendation Pipeline
+# CineMatch AI — RAG & Recommendation Pipeline Architecture
 
-## Pipeline Execution Steps
+## 1. Pipeline Execution Flow
 
 ```text
-[User Prompt / Query]
-         |
-         v
-1. [Intent Extraction & Filter Detection]
-   - Parse keywords, excluded genres, release year constraints, mentioned actors/directors.
-         |
-         v
-2. [Dual Retrieval Execution]
+[User Natural Language Prompt]
+              |
+              v
+1. [Intent Extraction & Constraint Parsing]
+   - Parse themes, keywords, excluded negative genres, release year bounds (minYear, maxYear).
+              |
+              v
+2. [Dual Asynchronous Retrieval]
    +------------------------------------+------------------------------------+
    |                                    |                                    |
    v                                    v                                    v
-[Gemini text-embedding-004]    [Neo4j Cypher Traversal]             [User Preferences]
+[Gemini Embedding-2 (1024-dim)]  [Neo4j Cypher Traversal]             [User Preferences]
    |                                    |                                    |
-[Pinecone Vector Search]       [Graph Neighbors & Co-occurrence]    [Favorites, Watched]
-   |                                    |                                    |
-(Semantic Candidates Top-30)   (Graph Candidates Top-30)            (Excluded / Boosted)
+[Pinecone Vector Search]         [Graph Relationships & Co-occurrence] [Favorite Genres & Likes]
+   | (Top-25 Cosine Similar)            | (Top-25 Graph Connected)           | (+10% Boost)
    +------------------------------------+------------------------------------+
                                         |
                                         v
 3. [Deduplication, Filtering, and Normalization]
-   - Merge candidates by canonical `movieId`.
-   - Discard movies violating explicit exclusions (e.g. before 2010, horror).
-   - Normalize semantic score: [0, 1]
-   - Normalize graph score: [0, 1]
-         |
-         v
-4. [Hybrid Ranking Engine]
-   finalScore = 0.60 * semanticScore + 0.20 * graphScore + 0.10 * ratingScore + 0.10 * preferenceScore
-   - Select Top-K (default: 5 to 10 candidates).
-         |
-         v
-5. [LangChain Prompt Construction]
-   - Inject verified movie candidate metadata (Title, Year, Director, Cast, Overview, Graph connection reason).
-   - Inject conversational history (if chat mode).
-   - Strictly prohibit hallucination or recommending unlisted movies.
-         |
-         v
-6. [Gemini Generative Model]
-   - Model: `gemini-1.5-flash` (or configured generation model).
-   - Generates structured JSON output with recommendation rationale and matched themes.
-         |
-         v
-7. [Zod Response Validation & Post-Processing]
-   - Validate structure with Zod schema.
-   - Verify all returned movie IDs against retrieved candidate set.
-   - Inject canonical posters, ratings, and database facts.
-         |
-         v
-[Final API Response to Frontend]
+   - Candidate union deduplicated by canonical `movieId`.
+   - Strict negative constraint enforcement (discard excluded genres, enforce minYear/maxYear).
+   - Min-Max score normalization:
+     - `semanticScore` in [0, 1]
+     - `graphScore` in [0, 1]
+              |
+              v
+4. [Hybrid Deterministic Ranking Engine]
+   finalScore = 0.60 * semanticScore 
+              + 0.20 * graphScore 
+              + 0.10 * ratingScore 
+              + 0.10 * preferenceBonus
+   - Top-K selected candidates (default: 5).
+              |
+              v
+5. [LangChain / Structured Prompt Construction]
+   - Inject verified candidate facts: Title, Year, Director, Cast, Overview, Graph Connections.
+   - Inject conversational history for multi-turn chat sessions.
+   - Enforce anti-hallucination instructions and prompt injection defenses.
+              |
+              v
+6. [Gemini Generative Synthesis]
+   - Primary: `gemini-3.5-flash`
+   - Secondary Failover: `gemini-3.1-flash-lite`
+   - Tertiary: Deterministic template synthesizer
+              |
+              v
+7. [Zod Validation & Canonical Fact Injection]
+   - Validate JSON output against `StructuredRecommendationOutputSchema`.
+   - Filter out any non-candidate movie IDs.
+   - Overwrite all canonical attributes (title, year, director, rating) from database ground truth.
+              |
+              v
+[Final Structured API Response to Frontend]
 ```
 
-## Anti-Hallucination Guardrails
-1. **Candidate Boundary**: The LLM prompt explicitly constrains recommendations only to candidates provided in the retrieval context.
-2. **Post-Validation**: The backend verifies each returned `movieId` belongs to the candidate list.
-3. **Canonical Data Replacement**: Titles, release years, directors, and ratings are injected from the canonical database record, ignoring any modified metadata produced by the LLM.
-4. **Fallback Mechanism**: If the generative model fails or outputs invalid JSON, the system gracefully falls back to deterministic ranked candidate cards with template-based evidence descriptions.
+---
+
+## 2. Mathematical Scoring Formulation
+
+For each candidate movie $m$, the final composite score is calculated deterministically:
+
+$$S(m) = w_v \cdot S_{\text{semantic}}(m) + w_g \cdot S_{\text{graph}}(m) + w_r \cdot S_{\text{rating}}(m) + w_p \cdot S_{\text{preference}}(m)$$
+
+Where:
+- $w_v = 0.60$: Pinecone cosine similarity score using Gemini Embeddings.
+- $w_g = 0.20$: Neo4j graph connectivity score based on shared directors, shared actors, and genre pathways.
+- $w_r = 0.10$: Normalized TMDB vote average ($\frac{\text{voteAverage}}{10}$).
+- $w_p = 0.10$: User preference bonus if the movie belongs to the user's favorite genres (+1.0) or shares nodes with liked movies (+0.5).
+
+Hard constraints (e.g., $m.\text{genres} \cap \text{negativeGenres} \neq \emptyset$ or $m.\text{year} < \text{minYear}$) result in immediate rejection ($S(m) = -\infty$).
+
+---
+
+## 3. Anti-Hallucination & Security Guardrails
+
+1. **Candidate Boundary Restriction**: The prompt instructs the model that it is strictly forbidden from recommending any movie not provided in the candidate list.
+2. **Deterministic Post-Validation**: Every recommendation returned by the LLM is checked against the set of candidate IDs. Any unrecognized ID is rejected.
+3. **Database Ground Truth Injection**: Titles, release dates, ratings, and crew are injected directly from the database, preventing fabricated metadata.
+4. **Prompt Injection Defense**: User queries are sanitized and delimited as raw user text, with strict system prompt hierarchy.
