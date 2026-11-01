@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Star, Bookmark, Film, Calendar, Sparkles } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { formatScore, formatYear } from '../utils/formatters';
+import { API_BASE_URL } from '../api/client';
 
 export default function MovieCard({ movie, score, reason }) {
   const { isAuthenticated, isMovieInWatchlist, toggleWatchlist } = useAuth();
@@ -16,7 +17,7 @@ export default function MovieCard({ movie, score, reason }) {
   const voteAverage = movie.voteAverage || movie.rating || 0;
   const releaseYear = movie.releaseYear || formatYear(movie.releaseDate);
   const genres = Array.isArray(movie.genres) ? movie.genres : [];
-  const posterSrc = movie.posterUrl || `/api/movies/${movieId}/poster`;
+  const posterSrc = movie.posterUrl?.startsWith('http') ? movie.posterUrl : `${API_BASE_URL}/movies/${movieId}/poster`;
 
   const handleBookmarkClick = async (e) => {
     e.preventDefault();

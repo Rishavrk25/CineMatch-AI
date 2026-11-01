@@ -19,6 +19,7 @@ import { formatRuntime, formatCurrency, formatYear, formatScore } from '../utils
 import LoadingSkeleton from '../components/LoadingSkeleton';
 import ErrorMessage from '../components/ErrorMessage';
 import MovieCard from '../components/MovieCard';
+import { API_BASE_URL } from '../api/client';
 
 export default function MovieDetails() {
   const { id } = useParams();
@@ -101,16 +102,18 @@ export default function MovieDetails() {
         <div className="relative z-10 flex flex-col md:flex-row gap-8 items-start">
           {/* Poster Card */}
           <div className="w-full md:w-64 aspect-[2/3] rounded-2xl bg-gradient-to-br from-charcoal-800 to-black border border-charcoal-700 overflow-hidden relative shrink-0 shadow-2xl flex items-center justify-center">
-            {movie.posterUrl ? (
-              <img
-                src={movie.posterUrl}
-                alt={movie.title}
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  e.currentTarget.style.display = 'none';
-                }}
-              />
-            ) : null}
+            <img
+              src={
+                movie.posterUrl?.startsWith('http')
+                  ? movie.posterUrl
+                  : `${API_BASE_URL}/movies/${id}/poster`
+              }
+              alt={movie.title}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
+              }}
+            />
             <div className="absolute inset-0 -z-0 flex flex-col items-center justify-center p-6 text-center">
               <Film className="w-16 h-16 text-cinematic-violet/40 mb-3" />
               <span className="text-sm font-bold text-gray-300">{movie.title}</span>

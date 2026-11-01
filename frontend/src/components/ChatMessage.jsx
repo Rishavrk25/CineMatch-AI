@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import RecommendationReason from './RecommendationReason';
 import { formatScore, formatYear } from '../utils/formatters';
 import { useAuth } from '../hooks/useAuth';
+import { API_BASE_URL } from '../api/client';
 
 export default function ChatMessage({ message, onSelectSuggestion }) {
   const { isMovieInWatchlist, toggleWatchlist, isAuthenticated } = useAuth();
@@ -80,7 +81,7 @@ export default function ChatMessage({ message, onSelectSuggestion }) {
                           className="w-14 sm:w-16 aspect-[2/3] rounded-xl bg-charcoal-800 border border-charcoal-700 overflow-hidden relative shrink-0 shadow-md flex items-center justify-center group"
                         >
                           <img
-                            src={rec.posterUrl || `/api/movies/${movieId}/poster`}
+                            src={rec.posterUrl?.startsWith('http') ? rec.posterUrl : `${API_BASE_URL}/movies/${movieId}/poster`}
                             alt={rec.title}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                             onError={(e) => {
