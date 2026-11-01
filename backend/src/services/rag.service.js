@@ -150,9 +150,42 @@ export async function getRecommendations({
   // Step 2: Fetch user preferences (taste profile, watched list)
   const preferences = await getUserPreferences(userId);
 
+  // Map favorite/watchlist IDs to actual movie records
+  const watchlistMovies = (preferences.favoriteMovieIds || [])
+    .map(id => getMovieById(id))
+    .filter(Boolean);
+
+  const isWatchlistQuery = /\b(watchlist|saved|my list|favorites|my movies|bookmarked)\b/i.test(query);
+
+  // If user specifically asked about an empty watchlist, return helpful guidance
+  if (isWatchlistQuery && watchlistMovies.length === 0) {
+    if (query.trim().length < 60 && parsedConstraints.genres.length === 0 && parsedConstraints.directors.length === 0) {
+      return {
+        summary: userId
+          ? "Your watchlist is currently empty. Browse the catalog on the Explore page or search for movies and click the bookmark icon to save titles. Once saved, I can tailor recommendations directly to your personal watchlist!"
+          : "You are currently not signed in. Sign in and bookmark your favorite movies to your watchlist, and I will tailor recommendations directly to your personal taste!",
+        recommendations: [],
+        appliedConstraints: parsedConstraints,
+        followUpSuggestions: [
+          "Recommend top-rated science fiction movies",
+          "Dark psychological thrillers directed by Christopher Nolan",
+          "Popular adventure movies"
+        ]
+      };
+    }
+  }
+
+  // Augment retrieval query with user's saved watchlist themes if querying about watchlist
+  let retrievalQuery = query;
+  if (isWatchlistQuery && watchlistMovies.length > 0) {
+    const titles = watchlistMovies.map(m => m.title).slice(0, 4).join(', ');
+    const genres = Array.from(new Set(watchlistMovies.flatMap(m => m.genres || []))).slice(0, 3).join(', ');
+    retrievalQuery = `${query}. Movies similar in themes and style to user's saved watchlist: ${titles}. Genres: ${genres}.`;
+  }
+
   // Step 3: Run Dual Retrieval in parallel (Pinecone vector search + Neo4j graph search)
   const vectorPromise = searchSimilarMovies({
-    query,
+    query: retrievalQuery,
     topK: 25,
     exclusionIds: filters.excludeWatched ? preferences.watchedIds : []
   }).catch(err => {
@@ -211,7 +244,11 @@ export async function getRecommendations({
   const generationResult = await generateGroundedRecommendations({
     userQuery: query,
     candidates: rankedCandidates,
-    constraints: parsedConstraints
+    constraints: parsedConstraints,
+    userProfile: {
+      watchlistTitles: watchlistMovies.map(m => `${m.title} (${m.releaseYear || ''})`),
+      favoriteGenres: preferences.favoriteGenres
+    }
   });
 
   // Step 6: Anti-Hallucination Output Validation & Canonical Data Replacement

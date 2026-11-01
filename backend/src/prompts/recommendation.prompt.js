@@ -21,17 +21,20 @@ Active User Constraints:
 - Excluded Genres: {excludedGenres}
 - Year Range: {yearRange}
 
+User Profile & Watchlist Context:
+{userProfileContext}
+
 CANDIDATE MOVIES (Retrieved from Pinecone Vector Search & Neo4j Knowledge Graph):
 {candidateSummaries}
 
 Provide your recommendations strictly from the candidates above.
 Format your output as a JSON object matching this exact structure:
 {{
-  "summary": "A 1-2 sentence overview of why these movies match the request.",
+  "summary": "A 1-2 sentence overview of why these movies match the request (referencing the user's watchlist or taste if applicable).",
   "recommendations": [
     {{
       "movieId": "canonical-movie-id-from-candidate-list",
-      "reason": "Detailed, evidence-based reason why this movie fits the user request.",
+      "reason": "Detailed, evidence-based reason why this movie fits the user request and connects to their watchlist taste.",
       "matchedThemes": ["theme1", "theme2"],
       "graphEvidence": ["Relational connection evidence if applicable"],
       "confidence": "high"
@@ -42,6 +45,6 @@ Format your output as a JSON object matching this exact structure:
 
 export const recommendationPrompt = new PromptTemplate({
   template: RECOMMENDATION_PROMPT_TEMPLATE,
-  inputVariables: ['userQuery', 'excludedGenres', 'yearRange', 'candidateSummaries']
+  inputVariables: ['userQuery', 'excludedGenres', 'yearRange', 'userProfileContext', 'candidateSummaries']
 });
 

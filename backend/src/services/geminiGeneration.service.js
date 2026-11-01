@@ -65,7 +65,8 @@ function buildFallbackRecommendations(candidates, userQuery) {
 export async function generateGroundedRecommendations({
   userQuery,
   candidates,
-  constraints = {}
+  constraints = {},
+  userProfile = {}
 }) {
   if (!candidates || candidates.length === 0) {
     return {
@@ -98,10 +99,25 @@ export async function generateGroundedRecommendations({
     ? `${constraints.minYear || 'Any'} to ${constraints.maxYear || 'Any'}`
     : 'All release years';
 
+  // Construct readable User Profile & Watchlist Context
+  let userProfileContext = 'None provided. Focus recommendations directly on the user query.';
+  if (userProfile && (userProfile.watchlistTitles?.length > 0 || userProfile.favoriteGenres?.length > 0)) {
+    const contextItems = [];
+    if (userProfile.watchlistTitles?.length > 0) {
+      contextItems.push(`- User's Saved Watchlist: ${userProfile.watchlistTitles.slice(0, 6).join(', ')}`);
+    }
+    if (userProfile.favoriteGenres?.length > 0) {
+      contextItems.push(`- Preferred Genres: ${userProfile.favoriteGenres.join(', ')}`);
+    }
+    contextItems.push('Use this taste profile to ground your recommendations and explain connections to the user\'s watchlist.');
+    userProfileContext = contextItems.join('\n');
+  }
+
   const userPromptText = await recommendationPrompt.format({
     userQuery,
     excludedGenres: excludedGenresText,
     yearRange: yearRangeText,
+    userProfileContext,
     candidateSummaries
   });
 
