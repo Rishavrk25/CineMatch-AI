@@ -11,3 +11,4 @@ router.post('/:movieId', addToWatchlist);
 router.delete('/:movieId', removeFromWatchlist);
 
 export default router;
+

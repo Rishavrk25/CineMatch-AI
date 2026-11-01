@@ -59,3 +59,4 @@ export const removeFromWatchlist = asyncHandler(async (req, res) => {
     movieId: String(movieId)
   });
 });
+

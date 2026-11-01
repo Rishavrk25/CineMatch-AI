@@ -49,3 +49,4 @@ describe('Movie Catalog & Discovery Endpoints', () => {
     assert.equal(res.body.success, false);
   });
 });
+

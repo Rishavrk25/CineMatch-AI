@@ -44,3 +44,4 @@ export const recommendationPrompt = new PromptTemplate({
   template: RECOMMENDATION_PROMPT_TEMPLATE,
   inputVariables: ['userQuery', 'excludedGenres', 'yearRange', 'candidateSummaries']
 });
+

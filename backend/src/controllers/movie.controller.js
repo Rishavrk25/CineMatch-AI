@@ -96,3 +96,4 @@ export const getSimilarMovies = asyncHandler(async (req, res) => {
     vectorSimilar
   });
 });
+

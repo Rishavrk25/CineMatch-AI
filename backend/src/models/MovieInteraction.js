@@ -35,3 +35,4 @@ movieInteractionSchema.index({ userId: 1, movieId: 1, interactionType: 1 });
 movieInteractionSchema.index({ userId: 1, createdAt: -1 });
 
 export const MovieInteraction = mongoose.model('MovieInteraction', movieInteractionSchema);
+

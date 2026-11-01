@@ -94,3 +94,4 @@ export function sendTokenResponse(user, statusCode, res) {
       }
     });
 }
+

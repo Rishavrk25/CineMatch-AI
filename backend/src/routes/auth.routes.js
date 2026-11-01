@@ -14,3 +14,4 @@ router.get('/me', authenticate, getMe);
 router.patch('/preferences', authenticate, validateRequest(updatePreferencesSchema), updatePreferences);
 
 export default router;
+

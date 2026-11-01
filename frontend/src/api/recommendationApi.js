@@ -5,18 +5,23 @@ export const recommendationApi = {
     return apiClient.post('/recommendations', {
       query,
       limit,
-      negativeGenres,
-      minYear,
-      maxYear
+      filters: {
+        excludedGenres: negativeGenres,
+        minYear,
+        maxYear
+      }
     });
   },
 
   async sendChatMessage({ message, conversationId = null, limit = 5 }) {
-    return apiClient.post('/recommendations/chat', {
+    const payload = {
       message,
-      conversationId,
       limit
-    });
+    };
+    if (conversationId) {
+      payload.conversationId = conversationId;
+    }
+    return apiClient.post('/recommendations/chat', payload);
   }
 };
 

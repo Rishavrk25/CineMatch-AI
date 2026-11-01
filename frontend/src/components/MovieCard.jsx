@@ -142,3 +142,4 @@ export default function MovieCard({ movie, score, reason }) {
     </div>
   );
 }
+

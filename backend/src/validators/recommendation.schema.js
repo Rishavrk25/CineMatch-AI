@@ -7,25 +7,29 @@ export const recommendationRequestSchema = z.object({
     filters: z.object({
       genres: z.array(z.string()).optional(),
       excludedGenres: z.array(z.string()).optional(),
-      minYear: z.number().int().min(1900).max(2030).optional(),
-      maxYear: z.number().int().min(1900).max(2030).optional(),
+      minYear: z.number().int().min(1900).max(2030).optional().nullable(),
+      maxYear: z.number().int().min(1900).max(2030).optional().nullable(),
       excludeWatched: z.boolean().optional()
-    }).optional(),
-    limit: z.number().int().min(1).max(20).default(5)
+    }).optional().nullable(),
+    negativeGenres: z.array(z.string()).optional(),
+    minYear: z.number().int().min(1900).max(2030).optional().nullable(),
+    maxYear: z.number().int().min(1900).max(2030).optional().nullable(),
+    limit: z.number().int().min(1).max(20).default(5).optional()
   })
 });
 
 // Request schema for /api/recommendations/chat
 export const chatRequestSchema = z.object({
   body: z.object({
-    conversationId: z.string().uuid().optional(),
+    conversationId: z.string().nullable().optional(),
     message: z.string().min(1, 'Message cannot be empty').max(1000, 'Message too long'),
+    limit: z.number().int().min(1).max(20).optional().default(5),
     filters: z.object({
       genres: z.array(z.string()).optional(),
       excludedGenres: z.array(z.string()).optional(),
-      minYear: z.number().int().optional(),
-      maxYear: z.number().int().optional()
-    }).optional()
+      minYear: z.number().int().optional().nullable(),
+      maxYear: z.number().int().optional().nullable()
+    }).optional().nullable()
   })
 });
 

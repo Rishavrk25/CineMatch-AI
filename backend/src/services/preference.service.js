@@ -63,3 +63,4 @@ export async function getUserPreferences(userId) {
     };
   }
 }
+

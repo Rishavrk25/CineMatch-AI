@@ -12,3 +12,4 @@ router.post('/', validateRequest(interactionSchema), recordInteraction);
 router.get('/me', getUserInteractions);
 
 export default router;
+

@@ -40,3 +40,4 @@ export default function GenreFilter({ selectedGenre = 'All', onSelectGenre }) {
     </div>
   );
 }
+

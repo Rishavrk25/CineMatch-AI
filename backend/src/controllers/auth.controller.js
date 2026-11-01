@@ -84,3 +84,4 @@ export const updatePreferences = asyncHandler(async (req, res) => {
     user: updatedUser
   });
 });
+

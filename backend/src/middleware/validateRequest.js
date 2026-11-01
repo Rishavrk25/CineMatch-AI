@@ -20,7 +20,8 @@ export const validateRequest = (schema) => (req, res, next) => {
         path: e.path.join('.'),
         message: e.message
       }));
-      return next(ApiError.badRequest('Request validation failed', details));
+      const detailedMessage = `Request validation failed: ${details.map(d => `${d.path} (${d.message})`).join(', ')}`;
+      return next(ApiError.badRequest(detailedMessage, details));
     }
     next(err);
   }

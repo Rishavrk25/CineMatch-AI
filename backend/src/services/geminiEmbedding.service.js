@@ -103,3 +103,4 @@ export async function embedMoviesInBatch(movieDocuments, onProgress = null) {
 
   return embeddings;
 }
+

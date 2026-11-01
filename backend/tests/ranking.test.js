@@ -100,3 +100,4 @@ describe('Deterministic Hybrid Ranking & Filtering Tests', () => {
     assert.ok(parsed.genres.includes('Science Fiction'), 'Should detect Science Fiction genre');
   });
 });
+

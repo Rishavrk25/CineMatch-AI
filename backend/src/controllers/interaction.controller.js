@@ -54,3 +54,4 @@ export const getUserInteractions = asyncHandler(async (req, res) => {
     interactions: populated
   });
 });
+
