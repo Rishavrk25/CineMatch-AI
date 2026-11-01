@@ -69,19 +69,19 @@ export default function ChatInterface({
       {/* Message List */}
       <div ref={chatContainerRef} className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
         {messages.length === 0 ? (
-          <div className="h-full flex flex-col justify-center items-center text-center max-w-lg mx-auto py-8 space-y-6">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-cinematic-violet/20 to-cinematic-amber/20 border border-cinematic-violet/30 flex items-center justify-center">
+          <div className="min-h-full flex flex-col items-center justify-start sm:justify-center text-center max-w-lg mx-auto py-6 space-y-4">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-cinematic-violet/20 to-cinematic-amber/20 border border-cinematic-violet/30 flex items-center justify-center shrink-0 shadow-lg shadow-cinematic-violet/10">
               <Sparkles className="w-7 h-7 text-cinematic-violet" />
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <h2 className="text-xl font-bold text-white">Ask for Any Kind of Cinema</h2>
               <p className="text-xs text-gray-400 leading-relaxed">
                 Describe themes, pacing, plot elements, or directors. CineMatch validates all recommendations against TMDB canonical metadata and Neo4j graph relationships.
               </p>
             </div>
 
-            <div className="w-full space-y-2 pt-2">
+            <div className="w-full space-y-2 pt-1">
               <span className="text-[11px] text-gray-400 font-semibold uppercase tracking-wider block">
                 Try a sample prompt:
               </span>
