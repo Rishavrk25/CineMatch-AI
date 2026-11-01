@@ -16,14 +16,16 @@ export default function ChatInterface({
   onReset
 }) {
   const [inputText, setInputText] = useState('');
-  const messagesEndRef = useRef(null);
+  const chatContainerRef = useRef(null);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
+  // Scroll ONLY the inner chat box when new messages arrive, never the window
   useEffect(() => {
-    scrollToBottom();
+    if (messages.length > 0 && chatContainerRef.current) {
+      chatContainerRef.current.scrollTo({
+        top: chatContainerRef.current.scrollHeight,
+        behavior: 'smooth'
+      });
+    }
   }, [messages, loading]);
 
   const handleSubmit = (e) => {
@@ -65,7 +67,7 @@ export default function ChatInterface({
       </div>
 
       {/* Message List */}
-      <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
+      <div ref={chatContainerRef} className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
         {messages.length === 0 ? (
           <div className="h-full flex flex-col justify-center items-center text-center max-w-lg mx-auto py-8 space-y-6">
             <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-cinematic-violet/20 to-cinematic-amber/20 border border-cinematic-violet/30 flex items-center justify-center">
@@ -114,7 +116,6 @@ export default function ChatInterface({
             )}
           </>
         )}
-        <div ref={messagesEndRef} />
       </div>
 
       {/* Input Form */}
