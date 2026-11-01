@@ -13,7 +13,9 @@ node_modules/
 # Large datasets
 data/*.csv
 data/*.zip
-data/*.json
+data/.indexing_progress.json
+!data/canonical_movies.json
+!data/poster_cache.json
 *.csv
 *.zip
 

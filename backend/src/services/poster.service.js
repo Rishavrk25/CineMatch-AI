@@ -6,7 +6,13 @@ import { logger } from '../utils/logger.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const CACHE_FILE = path.resolve(__dirname, '../../../data/poster_cache.json');
+const possiblePosterPaths = [
+  path.resolve(__dirname, '../../../data/poster_cache.json'),
+  path.resolve(__dirname, '../../data/poster_cache.json'),
+  path.resolve(process.cwd(), 'data/poster_cache.json'),
+  path.resolve(process.cwd(), '../data/poster_cache.json')
+];
+const CACHE_FILE = possiblePosterPaths.find(p => fs.existsSync(p)) || possiblePosterPaths[0];
 
 // In-memory poster map: { [movieIdOrTitle]: string }
 const posterCache = new Map();

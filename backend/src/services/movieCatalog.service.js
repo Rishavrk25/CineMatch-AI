@@ -6,7 +6,13 @@ import { logger } from '../utils/logger.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const CANONICAL_MOVIES_PATH = path.resolve(__dirname, '../../../data/canonical_movies.json');
+const possiblePaths = [
+  path.resolve(__dirname, '../../../data/canonical_movies.json'),
+  path.resolve(__dirname, '../../data/canonical_movies.json'),
+  path.resolve(process.cwd(), 'data/canonical_movies.json'),
+  path.resolve(process.cwd(), '../data/canonical_movies.json')
+];
+const CANONICAL_MOVIES_PATH = possiblePaths.find(p => fs.existsSync(p)) || possiblePaths[0];
 
 let moviesMap = null;
 let moviesList = null;
