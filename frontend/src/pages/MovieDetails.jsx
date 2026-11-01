@@ -99,11 +99,23 @@ export default function MovieDetails() {
         <div className="absolute -top-24 -right-24 w-96 h-96 bg-cinematic-violet/15 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-col md:flex-row gap-8 items-start">
-          {/* Poster placeholder card */}
-          <div className="w-full md:w-64 aspect-[2/3] rounded-2xl bg-gradient-to-br from-charcoal-800 to-black border border-charcoal-700 flex flex-col items-center justify-center p-6 text-center shrink-0 shadow-2xl">
-            <Film className="w-16 h-16 text-cinematic-violet/40 mb-3" />
-            <span className="text-sm font-bold text-gray-300">{movie.title}</span>
-            <span className="text-xs text-gray-500 mt-1">{movie.releaseYear}</span>
+          {/* Poster Card */}
+          <div className="w-full md:w-64 aspect-[2/3] rounded-2xl bg-gradient-to-br from-charcoal-800 to-black border border-charcoal-700 overflow-hidden relative shrink-0 shadow-2xl flex items-center justify-center">
+            {movie.posterUrl ? (
+              <img
+                src={movie.posterUrl}
+                alt={movie.title}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                }}
+              />
+            ) : null}
+            <div className="absolute inset-0 -z-0 flex flex-col items-center justify-center p-6 text-center">
+              <Film className="w-16 h-16 text-cinematic-violet/40 mb-3" />
+              <span className="text-sm font-bold text-gray-300">{movie.title}</span>
+              <span className="text-xs text-gray-500 mt-1">{movie.releaseYear}</span>
+            </div>
           </div>
 
           {/* Details */}

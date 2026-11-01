@@ -242,6 +242,7 @@ export async function getRecommendations({
       matchedThemes: rec.matchedThemes || verifiedCandidate.genres || [],
       graphEvidence: rec.graphEvidence?.length > 0 ? rec.graphEvidence : (verifiedCandidate.evidence || []),
       confidence: rec.confidence || 'high',
+      posterUrl: canonicalInfo.posterUrl || `/api/movies/${rec.movieId}/poster`,
       scoreBreakdown: verifiedCandidate.scoreBreakdown,
       finalScore: verifiedCandidate.finalScore,
       sources: verifiedCandidate.sources
@@ -272,6 +273,7 @@ export async function getRecommendations({
             : `Selected based on high semantic vector relevance score (${(c.semanticScore * 100).toFixed(0)}%).`,
           matchedThemes: c.genres || [],
           graphEvidence: c.evidence || [],
+          posterUrl: canonicalInfo.posterUrl || `/api/movies/${c.movieId}/poster`,
           confidence: 'high',
           scoreBreakdown: c.scoreBreakdown,
           finalScore: c.finalScore,

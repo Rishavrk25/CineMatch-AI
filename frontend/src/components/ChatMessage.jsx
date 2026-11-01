@@ -74,35 +74,52 @@ export default function ChatMessage({ message, onSelectSuggestion }) {
                   >
                     {/* Header Row */}
                     <div className="flex items-start justify-between gap-4">
-                      <div className="space-y-1">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <Link
-                            to={`/movies/${movieId}`}
-                            className="text-base sm:text-lg font-bold text-white hover:text-cinematic-violet transition-colors"
-                          >
-                            {rec.title}
-                          </Link>
-                          {rec.releaseYear && (
-                            <span className="text-xs text-gray-400 flex items-center gap-1">
-                              <Calendar className="w-3 h-3 text-gray-500" />
-                              ({rec.releaseYear})
-                            </span>
+                      <div className="flex items-start gap-3.5">
+                        <Link
+                          to={`/movies/${movieId}`}
+                          className="w-14 sm:w-16 aspect-[2/3] rounded-xl bg-charcoal-800 border border-charcoal-700 overflow-hidden relative shrink-0 shadow-md flex items-center justify-center group"
+                        >
+                          <img
+                            src={rec.posterUrl || `/api/movies/${movieId}/poster`}
+                            alt={rec.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                            }}
+                          />
+                          <Film className="w-5 h-5 text-charcoal-600 absolute -z-0" />
+                        </Link>
+
+                        <div className="space-y-1">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <Link
+                              to={`/movies/${movieId}`}
+                              className="text-base sm:text-lg font-bold text-white hover:text-cinematic-violet transition-colors"
+                            >
+                              {rec.title}
+                            </Link>
+                            {rec.releaseYear && (
+                              <span className="text-xs text-gray-400 flex items-center gap-1">
+                                <Calendar className="w-3 h-3 text-gray-500" />
+                                ({rec.releaseYear})
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Genres */}
+                          {rec.genres && rec.genres.length > 0 && (
+                            <div className="flex flex-wrap gap-1.5 pt-0.5">
+                              {rec.genres.map((g) => (
+                                <span
+                                  key={g}
+                                  className="px-2 py-0.5 rounded-md bg-charcoal-800 border border-charcoal-700 text-[10px] text-gray-300 font-medium"
+                                >
+                                  {g}
+                                </span>
+                              ))}
+                            </div>
                           )}
                         </div>
-
-                        {/* Genres */}
-                        {rec.genres && rec.genres.length > 0 && (
-                          <div className="flex flex-wrap gap-1.5 pt-0.5">
-                            {rec.genres.map((g) => (
-                              <span
-                                key={g}
-                                className="px-2 py-0.5 rounded-md bg-charcoal-800 border border-charcoal-700 text-[10px] text-gray-300 font-medium"
-                              >
-                                {g}
-                              </span>
-                            ))}
-                          </div>
-                        )}
                       </div>
 
                       {/* Right actions: Match Score + Bookmark */}

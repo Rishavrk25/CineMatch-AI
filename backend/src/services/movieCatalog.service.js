@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { getCachedPoster } from './poster.service.js';
 import { logger } from '../utils/logger.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -41,7 +42,12 @@ function loadCatalog() {
  */
 export function getMovieById(id) {
   const { moviesMap } = loadCatalog();
-  return moviesMap.get(String(id)) || null;
+  const movie = moviesMap.get(String(id));
+  if (!movie) return null;
+  return {
+    ...movie,
+    posterUrl: getCachedPoster(movie.movieId, movie.title) || `/api/movies/${movie.movieId}/poster`
+  };
 }
 
 /**
@@ -96,7 +102,10 @@ export function getMovies({
 
   const total = filtered.length;
   const startIndex = (page - 1) * limit;
-  const items = filtered.slice(startIndex, startIndex + limit);
+  const items = filtered.slice(startIndex, startIndex + limit).map(m => ({
+    ...m,
+    posterUrl: getCachedPoster(m.movieId, m.title) || `/api/movies/${m.movieId}/poster`
+  }));
 
   return {
     total,

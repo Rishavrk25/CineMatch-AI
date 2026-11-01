@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Star, Bookmark, Film, Calendar, Sparkles } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
@@ -8,11 +8,15 @@ export default function MovieCard({ movie, score, reason }) {
   const { isAuthenticated, isMovieInWatchlist, toggleWatchlist } = useAuth();
   const navigate = useNavigate();
 
+  const [imgLoaded, setImgLoaded] = useState(false);
+  const [imgError, setImgError] = useState(false);
+
   const movieId = movie.movieId || movie.id;
   const isBookmarked = isMovieInWatchlist(movieId);
   const voteAverage = movie.voteAverage || movie.rating || 0;
   const releaseYear = movie.releaseYear || formatYear(movie.releaseDate);
   const genres = Array.isArray(movie.genres) ? movie.genres : [];
+  const posterSrc = movie.posterUrl || `/api/movies/${movieId}/poster`;
 
   const handleBookmarkClick = async (e) => {
     e.preventDefault();
@@ -32,13 +36,36 @@ export default function MovieCard({ movie, score, reason }) {
 
   return (
     <div className="group relative flex flex-col rounded-2xl glass-panel border border-charcoal-700/60 overflow-hidden hover:border-cinematic-violet/50 hover:shadow-xl hover:shadow-cinematic-violet/10 transition-all duration-300">
-      {/* Poster Placeholder Banner */}
-      <div className="relative aspect-[16/10] bg-gradient-to-br from-charcoal-800 via-charcoal-900 to-black overflow-hidden flex items-center justify-center">
-        <Film className="w-12 h-12 text-charcoal-700 group-hover:scale-110 group-hover:text-cinematic-violet/50 transition-all duration-500" />
-        
+      {/* Poster Image Container */}
+      <div className="relative aspect-[2/3] bg-gradient-to-br from-charcoal-800 via-charcoal-900 to-black overflow-hidden flex items-center justify-center">
+        {/* Real Poster Image */}
+        {!imgError && posterSrc && (
+          <img
+            src={posterSrc}
+            alt={movie.title}
+            loading="lazy"
+            onLoad={() => setImgLoaded(true)}
+            onError={() => setImgError(true)}
+            className={`absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-all duration-500 ${
+              imgLoaded ? 'opacity-100' : 'opacity-0'
+            }`}
+          />
+        )}
+
+        {/* Fallback Icon when loading or image failed */}
+        {(!imgLoaded || imgError) && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center bg-gradient-to-br from-charcoal-800 via-charcoal-900 to-black">
+            <Film className="w-12 h-12 text-charcoal-700 group-hover:scale-110 group-hover:text-cinematic-violet/50 transition-all duration-500 mb-2" />
+            <span className="text-xs font-semibold text-gray-400 line-clamp-1">{movie.title}</span>
+          </div>
+        )}
+
+        {/* Cinematic Gradient Vignette Overlay for Readability */}
+        <div className="absolute inset-0 bg-gradient-to-t from-charcoal-950/90 via-transparent to-black/50 pointer-events-none" />
+
         {/* Rating Badge */}
         {voteAverage > 0 && (
-          <div className="absolute top-3 left-3 flex items-center gap-1 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-xs font-semibold text-cinematic-amber">
+          <div className="absolute top-3 left-3 flex items-center gap-1 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-xs font-semibold text-cinematic-amber z-10">
             <Star className="w-3.5 h-3.5 fill-cinematic-amber text-cinematic-amber" />
             <span>{voteAverage.toFixed(1)}</span>
           </div>
@@ -46,7 +73,7 @@ export default function MovieCard({ movie, score, reason }) {
 
         {/* RAG Match Score Pill */}
         {score !== undefined && score !== null && (
-          <div className="absolute top-3 right-12 flex items-center gap-1 px-2.5 py-1 rounded-full bg-cinematic-violet/80 backdrop-blur-md border border-cinematic-violet text-xs font-bold text-white shadow-lg shadow-cinematic-violet/20">
+          <div className="absolute top-3 right-12 flex items-center gap-1 px-2.5 py-1 rounded-full bg-cinematic-violet/80 backdrop-blur-md border border-cinematic-violet text-xs font-bold text-white shadow-lg shadow-cinematic-violet/20 z-10">
             <Sparkles className="w-3 h-3 text-cinematic-amber" />
             <span>{formatScore(score)}</span>
           </div>
@@ -56,7 +83,7 @@ export default function MovieCard({ movie, score, reason }) {
         <button
           onClick={handleBookmarkClick}
           aria-label={isBookmarked ? 'Remove from Watchlist' : 'Add to Watchlist'}
-          className={`absolute top-3 right-3 p-2 rounded-full backdrop-blur-md border transition-all ${
+          className={`absolute top-3 right-3 p-2 rounded-full backdrop-blur-md border transition-all z-10 ${
             isBookmarked
               ? 'bg-cinematic-amber text-charcoal-950 border-cinematic-amber'
               : 'bg-black/60 text-gray-300 hover:text-white border-white/10 hover:border-cinematic-violet'
@@ -67,7 +94,7 @@ export default function MovieCard({ movie, score, reason }) {
 
         {/* Release Year Pill */}
         {releaseYear && (
-          <div className="absolute bottom-3 left-3 flex items-center gap-1 px-2 py-0.5 rounded-md bg-black/50 backdrop-blur-sm text-[11px] text-gray-300">
+          <div className="absolute bottom-3 left-3 flex items-center gap-1 px-2.5 py-1 rounded-md bg-black/60 backdrop-blur-sm text-[11px] font-medium text-gray-200 z-10">
             <Calendar className="w-3 h-3 text-gray-400" />
             <span>{releaseYear}</span>
           </div>
@@ -99,11 +126,11 @@ export default function MovieCard({ movie, score, reason }) {
           )}
 
           {/* Director & Cast snippet if present */}
-          {(movie.director || (movie.cast && movie.cast.length > 0)) && (
+          {(movie.director || (movie.cast && movie.cast.length > 0) || (movie.directors && movie.directors.length > 0)) && (
             <div className="text-xs text-gray-400 mt-2 space-y-0.5">
-              {movie.director && (
+              {(movie.director || (movie.directors && movie.directors[0])) && (
                 <p className="line-clamp-1">
-                  <span className="text-gray-500 font-medium">Dir:</span> {movie.director}
+                  <span className="text-gray-500 font-medium">Dir:</span> {movie.director || movie.directors[0]}
                 </p>
               )}
               {movie.cast && movie.cast.length > 0 && (
@@ -142,4 +169,3 @@ export default function MovieCard({ movie, score, reason }) {
     </div>
   );
 }
-

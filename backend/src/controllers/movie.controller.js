@@ -1,6 +1,7 @@
 import { getMovieById, getMovies } from '../services/movieCatalog.service.js';
 import { getGraphConnectedMovies } from '../services/graphSearch.service.js';
 import { searchSimilarMovies } from '../services/vectorSearch.service.js';
+import { getPosterForMovie, getCachedPoster } from '../services/poster.service.js';
 import { ApiError } from '../utils/ApiError.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 
@@ -41,6 +42,22 @@ export const getMovie = asyncHandler(async (req, res) => {
     success: true,
     movie
   });
+});
+
+export const getMoviePoster = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const movie = getMovieById(id);
+
+  if (!movie) {
+    throw ApiError.notFound(`Movie with ID ${id} not found`);
+  }
+
+  const posterUrl = await getPosterForMovie(id, movie.title, movie.releaseYear);
+  if (posterUrl) {
+    return res.redirect(302, posterUrl);
+  }
+
+  throw ApiError.notFound(`Poster for "${movie.title}" not found`);
 });
 
 export const searchMovies = asyncHandler(async (req, res) => {
