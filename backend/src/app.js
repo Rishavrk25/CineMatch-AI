@@ -25,19 +25,13 @@ app.use(
   })
 );
 
-// Clean and prepare allowed origins
-const configuredClientUrls = (env.CLIENT_URL || '')
+// Clean and prepare allowed origins strictly from environment variables (.env)
+const configuredOrigins = (env.CLIENT_URL || '')
   .split(',')
   .map(url => url.trim().replace(/\/+$/, ''))
   .filter(Boolean);
 
-const allowedOrigins = new Set([
-  ...configuredClientUrls,
-  'http://localhost:5173',
-  'http://127.0.0.1:5173',
-  'http://localhost:3000',
-  'http://localhost:4173'
-]);
+const allowedOrigins = new Set(configuredOrigins);
 
 const corsOptions = {
   origin: (origin, callback) => {
@@ -48,17 +42,12 @@ const corsOptions = {
 
     const cleanOrigin = origin.replace(/\/+$/, '');
 
-    // Allow explicitly configured origins or any deploy domain on Render, Vercel, or Netlify
-    if (
-      allowedOrigins.has(cleanOrigin) ||
-      cleanOrigin.endsWith('.onrender.com') ||
-      cleanOrigin.endsWith('.vercel.app') ||
-      cleanOrigin.endsWith('.netlify.app')
-    ) {
+    // Allow if wildcard is configured or if origin matches configured values in .env
+    if (allowedOrigins.has('*') || allowedOrigins.has(cleanOrigin)) {
       return callback(null, true);
     }
 
-    logger.warn(`Blocked CORS request from origin: ${origin}`);
+    logger.warn(`Blocked CORS request from origin: ${origin}. Configured allowed origins from .env: [${Array.from(allowedOrigins).join(', ')}]`);
     return callback(new ApiError(403, `CORS policy violation: Origin ${origin} not allowed`));
   },
   credentials: true,
