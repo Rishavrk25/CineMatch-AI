@@ -14,7 +14,7 @@ dotenv.config({ path: path.resolve(process.cwd(), 'backend/.env') });
 export const env = {
   PORT: parseInt(process.env.PORT || '5000', 10),
   NODE_ENV: process.env.NODE_ENV || 'development',
-  CLIENT_URL: process.env.CLIENT_URL || 'http://localhost:5173',
+  CLIENT_URL: process.env.CLIENT_URL || 'https://cinematch-ai-yrd6.onrender.com,http://localhost:5173',
   
   // Security
   JWT_SECRET: process.env.JWT_SECRET || 'dev_secret_key_change_in_production_min_32_chars',
